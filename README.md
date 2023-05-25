@@ -1,54 +1,113 @@
+## PDF Content Similarity Checker
 
-# PDF Text Similarity Checker
+The **PDF Content Similarity Checker** script compares the content similarity between multiple PDF files in a given directory. It extracts the text from each PDF file, applies text vectorization using the TF-IDF (Term Frequency-Inverse Document Frequency) algorithm, calculates the cosine similarity between pairs of texts, and saves the results to a CSV file.
 
-This Python script compares the similarity of text extracted from multiple PDF files. It preprocesses the text using natural language processing (NLP) techniques, such as stop word removal and lemmatization. It then calculates the cosine similarity between the preprocessed texts to determine their similarity.
+### Dependencies
 
-## Dependencies
+- `tqdm`: A library for creating progress bars in the command line.
+- `pathlib`: A module for working with file paths and directories.
+- `PyPDF2`: A library for reading and manipulating PDF files.
+- `scikit-learn`: A machine learning library that includes the `TfidfVectorizer` and `cosine_similarity` classes.
+- `pandas`: A data manipulation and analysis library.
 
-The script requires the following dependencies:
+### Functions
 
-- tqdm: A library for creating progress bars during the processing of PDF files.
-- pathlib: A module for working with file and directory paths.
-- PyPDF2: A library for extracting text from PDF files.
-- scikit-learn: A machine learning library used for text vectorization and cosine similarity calculation.
-- pandas: A library for data manipulation and analysis.
-- nltk: The Natural Language Toolkit, used for downloading stopwords.
-- spacy: An open-source library for advanced NLP tasks.
+#### `compare_texts(text1, text2)`
 
-Make sure to install these dependencies before running the script.
+Calculates the cosine similarity between two input texts using TF-IDF vectorization.
 
-## Preprocessing
+- **Input:**
+  - `text1` (str): The first text to compare.
+  - `text2` (str): The second text to compare.
+- **Output:**
+  - `similarity_score` (float): The cosine similarity score between the two texts.
 
-The script uses NLTK and spaCy libraries for text preprocessing. It downloads the stopwords corpus from NLTK and loads the spaCy English language model (`en_core_web_sm`).
+### Main Procedure
 
-The `preprocess_text(text)` function preprocesses the text by removing stopwords and lemmatizing the remaining words using spaCy. It returns the preprocessed text as a string.
+1. Set the directory path where the PDF files are located.
+2. Initialize an empty list, `pdf_data`, to store the extracted text, filename, and path for each PDF.
+3. Iterate through each PDF file in the specified directory:
+   - Create a `PdfReader` object to read the PDF file.
+   - Extract the text from each page of the PDF and concatenate it into a single string.
+   - If the extracted text is not empty, add the filename, path, and text to the `pdf_data` list.
+4. Initialize an empty list, `data`, to store the similarity results.
+5. Iterate through each pair of PDF texts in `pdf_data`:
+   - Calculate the similarity score using the `compare_texts` function.
+   - If the similarity score is close to 1.0, add the filenames, similarity score, and paths to the `data` list.
+6. Create a pandas DataFrame from the `data` list.
+7. Save the DataFrame to a CSV file named "pdf_content_similarity_check.csv".
 
-## Text Comparison
+### Usage
 
-The `compare_texts(text1, text2)` function compares the similarity between two preprocessed texts. It uses scikit-learn's `CountVectorizer` to transform the texts into vectors and then calculates the cosine similarity between the vectors. The similarity score is returned.
+1. Install the required dependencies listed above.
+2. Set the directory path where the PDF files are located in the `directory` variable.
+3. Run the script.
+4. The progress of processing PDFs and calculating similarity will be displayed in the command line.
+5. Once completed, the results will be saved in the specified CSV file.
 
-## File Processing
+### Example
 
-The script processes PDF files located in a specific directory specified by the `directory` variable. It extracts the text from each PDF file using the PyPDF2 library and preprocesses the text using the `preprocess_text()` function. The preprocessed text and the corresponding filenames are stored in separate lists.
+Suppose you have a directory named "PDFs" containing the following PDF files:
+- "file1.pdf"
+- "file2.pdf"
+- "file3.pdf"
 
-## Similarity Calculation
+Running this script with the "PDFs" directory will perform the following steps:
+1. Extract the text from each PDF file.
+2. Calculate the similarity between pairs of texts.
+3. Identify pairs of PDFs with a similarity score close to 1.0.
+4. Save the results to a CSV file named "pdf_content_similarity_check.csv".
 
-The script compares the similarity of the preprocessed texts from each pair of PDF files. It loops through the lists of preprocessed texts and calculates the similarity score using the `compare_texts()` function. If the similarity score is close to 1.0 (within a small threshold), the pair is considered highly similar.
+The resulting CSV file will include the following columns:
+- "PDF 1": The filename of the first PDF in the pair.
+- "PDF 2": The filename of the second PDF in the pair.
+- "Similarity Score": The cosine similarity score between the texts of the two PDFs.
+- "Path 1": The path of the first PDF file.
+- "Path 2": The path of the second PDF file.
 
-## Similarity Score
+#### Explanation of How `cosine_similarity` Works to Compare Texts
 
-The similarity score represents the degree of similarity between two preprocessed texts. It is calculated using cosine similarity, which is a metric commonly used to measure the similarity between two vectors.
+**Vectorization:**
 
-Cosine similarity ranges from 0 to 1, where 0 indicates no similarity and 1 indicates perfect similarity. In the context of this script, the similarity score represents the similarity between the extracted texts from two PDF files. A higher similarity score indicates a greater resemblance in the content of the PDF files.
+Before comparing texts, the text data needs to be transformed into numerical representations that can be processed mathematically. This process is called vectorization. The `TfidfVectorizer` class from the scikit-learn library is used to perform vectorization. It converts the text data into a matrix of TF-IDF (Term Frequency-Inverse Document Frequency) features.
 
-The script considers a similarity score close to 1.0 as an indication of high similarity. It uses a threshold value of 1e-6 to determine if the score is practically equal to 1.0, accounting for potential floating-point precision differences. If the absolute difference between the similarity score and 1.0 is less than the threshold, the pair of PDF files is considered highly similar.
+TF-IDF stands for Term Frequency-Inverse Document Frequency. It is a numerical statistic that reflects the importance of a word in a document relative to a collection of documents. The vectorizer calculates the TF-IDF values for each word in the text and constructs a vector representation for each document.
 
-The similarity score provides a quantitative measure of how closely related the contents of two PDF files are after preprocessing. This information can be valuable in various applications such as plagiarism detection, document clustering, or content analysis.
+**Cosine Similarity Calculation:**
 
-## Output
+Once the text data is transformed into vectors, the cosine similarity can be calculated between the vectors. Cosine similarity measures the cosine of the angle between two vectors, which indicates their similarity.
 
-The script creates a pandas DataFrame called `data` to store the pairs of PDF filenames, their similarity scores, and the path of the directory. For each highly similar pair, a new DataFrame is created and concatenated with the existing `data` DataFrame. Finally, the `data` DataFrame is saved as a CSV file named "pdf_content_similarity_check.csv" in the specified output directory.
+The formula for cosine similarity is:
 
-Ensure that you have the necessary permissions and provide a valid directory path for the output file.
+![Cosine Similarity Formula](https://latex.codecogs.com/png.image?\dpi{150}&space;\bg_white&space;\large&space;\text{cosine\_similarity}&space;=&space;\frac{(A&space;\cdot&space;B)}{(||A||&space;\cdot&space;||B||)})
 
-Make sure to adjust the directory path and other relevant variables according to your specific requirements before running the script.
+- `A` and `B` are the vectors being compared.
+- `(A \cdot B)` denotes the dot product of vectors `A` and `B`, which is the sum of the element-wise products of the corresponding elements in the vectors.
+- `||A||` and `||B||` represent the Euclidean norms (lengths) of vectors `A` and `B`, respectively.
+
+The cosine similarity ranges between -1 and 1, where:
+- 1 indicates that the vectors are identical (highest similarity).
+- 0 indicates that the vectors are orthogonal (no similarity).
+- -1 indicates that the vectors are diametrically opposed (highest dissimilarity).
+
+**Interpreting Cosine Similarity:**
+
+In the context of text comparison, a cosine similarity score close to 1 indicates that the two texts have similar content and are likely to be related. Conversely, a cosine similarity score close to 0 or -1 indicates dissimilar or unrelated texts.
+
+The similarity score obtained from `cosine_similarity` is a quantitative measure of how similar the texts are.
+
+**Application in the Code:**
+
+In the provided code, the `compare_texts` function takes two input texts (representing the content of two PDF files) and performs the following steps:
+
+1. Creates a `TfidfVectorizer` object with stop_words set to 'english'.
+2. Uses the vectorizer to fit and transform the input texts, obtaining vector representations for each text.
+3. Calculates the cosine similarity between the two vectors using the `cosine_similarity` function.
+4. Returns the similarity score.
+
+By using the cosine similarity metric, the code compares the textual content of PDF files and determines their similarity based on the angle between their vector representations. This allows for the identification of similar or closely related documents within a given set.
+
+📝 **Note**: The cosine similarity calculation is a widely used method for comparing texts in natural language processing and information retrieval tasks.
+
+**Note:**
+- This script assumes that the necessary dependencies are installed and the PDF files in the specified directory are accessible and
